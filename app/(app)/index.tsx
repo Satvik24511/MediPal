@@ -118,19 +118,24 @@ export default function ConnectScreen() {
         </View>
       )}
 
-      <View style={connectScreenStyles.bottomImageCard}>
-        <Image
-          source={require('../../assets/medilab_bg.jpg')} 
-          style={connectScreenStyles.bottomImage}
-          resizeMode="contain"
-        />
-        <Text style={connectScreenStyles.bottomImageCardText}>Upload. Analyze. Relax.</Text>
-        <View style={connectScreenStyles.paginationDots}>
-          <View style={connectScreenStyles.dotActive} />
-          <View style={connectScreenStyles.dot} />
-          <View style={connectScreenStyles.dot} />
-        </View>
-      </View>
+      <LinearGradient
+        colors={['#FF6F61', '#8A2BE2']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={connectScreenStyles.footerGradient}
+      >
+            <Image
+            source={require('../../assets/medilab_bg.jpg')} 
+            style={connectScreenStyles.bottomImage}
+            resizeMode="contain"
+            />
+            <Text style={connectScreenStyles.bottomImageCardText}>Upload. Analyze. Relax.</Text>
+            <View style={connectScreenStyles.paginationDots}>
+            <View style={connectScreenStyles.dotActive} />
+            <View style={connectScreenStyles.dot} />
+            <View style={connectScreenStyles.dot} />
+            </View>
+    </LinearGradient>
     </ScrollView>
   );
 };
@@ -150,6 +155,16 @@ const connectScreenStyles = StyleSheet.create({
     paddingTop: Platform.OS === 'android' ? 50 : 0,
     position: 'relative',
   },
+  footerGradient: {
+    width: '100%',
+    height: 360,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingBottom: Platform.OS === 'android' ? 50 : 0,
+    position: 'relative',
+  },
   profileIconContainer: {
     position: 'absolute',
     top: Platform.OS === 'android' ? 60 : 50,
@@ -167,7 +182,7 @@ const connectScreenStyles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     padding: 25,
-    marginTop: -60,
+    marginTop: 10,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
@@ -271,7 +286,7 @@ const connectScreenStyles = StyleSheet.create({
     alignSelf: 'center',
     padding: 25,
     alignItems: 'center',
-    marginBottom: 80, 
+    marginBottom: -30, 
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.15,
@@ -284,9 +299,9 @@ const connectScreenStyles = StyleSheet.create({
     marginBottom: 15,
   },
   bottomImageCardText: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#ffffff',
     marginBottom: 10,
   },
   paginationDots: {
