@@ -1,15 +1,35 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, Platform } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient'; 
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
-import { GradientButton } from '../../components/GradientButton'; 
-import { useAppContext } from '../../AppContext'; 
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, Platform, Dimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { GradientButton } from '../../components/GradientButton';
+import { useAppContext } from '../../AppContext';
 
 export default function ConnectScreen() {
   const { showModal } = useAppContext();
   const [prescriptionText, setPrescriptionText] = useState('');
-  const [reportGenerated, setReportGenerated] = useState(false); 
-  const [reportContent, setReportContent] = useState(''); 
+  const [reportGenerated, setReportGenerated] = useState(false);
+  const [reportContent, setReportContent] = useState('');
+
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+
+  const footerSlides = [
+    {
+      id: '1',
+      image: require('../../assets/medilab1.png'),
+      text: 'Upload. Analyze. Relax.',
+    },
+    {
+      id: '2',
+      image: require('../../assets/medilab2.png'),
+      text: 'Upload your medical prescriptions or type them in manually.',
+    },
+    {
+      id: '3',
+      image: require('../../assets/medilab3.png'),
+      text: 'Your Health Data is Secure.',
+    },
+  ];
 
   const handleAddImagePrescription = () => {
     showModal('Image upload and OCR functionality would be implemented here.', 'info');
@@ -28,7 +48,7 @@ export default function ConnectScreen() {
       const dummyReport = `
         **Medilab Health Report**
 
-        **Patient ID:** ${Math.floor(Math.random() * 1000) + 1}
+        **Patient ID:** ${'N/A'}
         **Date of Report:** ${new Date().toLocaleDateString()}
 
         **Based on your input:**
@@ -42,8 +62,8 @@ export default function ConnectScreen() {
 
         **Disclaimer:** This is a preliminary, AI-generated report for informational purposes only and does not substitute professional medical advice. Always consult with a qualified healthcare provider for diagnosis and treatment.
       `;
-      setReportContent(dummyReport); 
-      setReportGenerated(true); 
+      setReportContent(dummyReport);
+      setReportGenerated(true);
       showModal('Report generated successfully!', 'success');
     }, 2000);
   };
@@ -52,6 +72,15 @@ export default function ConnectScreen() {
     showModal('PDF generation and download functionality would be implemented here.', 'info');
     console.log("Download report as PDF");
   };
+
+  const handleScroll = (event: any) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const layoutWidth = event.nativeEvent.layoutMeasurement.width;
+    const newIndex = Math.round(contentOffsetX / layoutWidth);
+    setActiveSlideIndex(newIndex);
+  };
+
+  const screenWidth = Dimensions.get('window').width;
 
   return (
     <ScrollView style={connectScreenStyles.container}>
@@ -124,18 +153,36 @@ export default function ConnectScreen() {
         end={{ x: 1, y: 1 }}
         style={connectScreenStyles.footerGradient}
       >
-            <Image
-            source={require('../../assets/medilab_bg.jpg')} 
-            style={connectScreenStyles.bottomImage}
-            resizeMode="contain"
-            />
-            <Text style={connectScreenStyles.bottomImageCardText}>Upload. Analyze. Relax.</Text>
-            <View style={connectScreenStyles.paginationDots}>
-            <View style={connectScreenStyles.dotActive} />
-            <View style={connectScreenStyles.dot} />
-            <View style={connectScreenStyles.dot} />
+        <ScrollView
+          horizontal
+          pagingEnabled 
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+        >
+          {footerSlides.map((slide, index) => (
+            <View key={slide.id} style={[connectScreenStyles.footerSlideItem, { width: screenWidth }]}>
+              <Image
+                source={slide.image}
+                style={connectScreenStyles.bottomImage}
+                resizeMode="contain"
+              />
+              <Text style={connectScreenStyles.bottomImageCardText}>{slide.text}</Text>
             </View>
-    </LinearGradient>
+          ))}
+        </ScrollView>
+        <View style={connectScreenStyles.paginationDots}>
+          {footerSlides.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                connectScreenStyles.dot,
+                index === activeSlideIndex && connectScreenStyles.dotActive,
+              ]}
+            />
+          ))}
+        </View>
+      </LinearGradient>
     </ScrollView>
   );
 };
@@ -164,6 +211,7 @@ const connectScreenStyles = StyleSheet.create({
     borderTopRightRadius: 30,
     paddingBottom: Platform.OS === 'android' ? 50 : 0,
     position: 'relative',
+    marginTop: 20,
   },
   profileIconContainer: {
     position: 'absolute',
@@ -182,7 +230,7 @@ const connectScreenStyles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     padding: 25,
-    marginTop: 10,
+    marginTop: 30,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
@@ -279,19 +327,10 @@ const connectScreenStyles = StyleSheet.create({
   downloadPdfButtonText: {
     fontSize: 16,
   },
-  bottomImageCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 25,
-    width: '90%',
-    alignSelf: 'center',
-    padding: 25,
+  footerSlideItem: {
     alignItems: 'center',
-    marginBottom: -30, 
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 8,
+    justifyContent: 'center',
+    paddingHorizontal: 25,
   },
   bottomImage: {
     width: 150,
@@ -303,10 +342,13 @@ const connectScreenStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffffff',
     marginBottom: 10,
+    textAlign: 'center',
   },
   paginationDots: {
     flexDirection: 'row',
     marginTop: 10,
+    position: 'absolute',
+    bottom: 20,
   },
   dot: {
     width: 8,
