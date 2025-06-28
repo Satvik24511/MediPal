@@ -10,12 +10,13 @@ import { ModalMessage } from '../components/ModalMessage';
 import { View, Text, StyleSheet } from 'react-native';
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID", 
+  apiKey: "AIzaSyA6o167Xbyf37-xfIclITfbsDB4VTQ4-Oo",
+  authDomain: "medipal-ddfc9.firebaseapp.com",
+  projectId: "medipal-ddfc9",
+  storageBucket: "medipal-ddfc9.firebasestorage.app",
+  messagingSenderId: "632599606212",
+  appId: "1:632599606212:web:1dc400c2c707218a36ea91",
+  measurementId: "G-N3PXSEPNKW"
 };
 
 const app = initializeApp(firebaseConfig);
