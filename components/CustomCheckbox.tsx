@@ -23,11 +23,11 @@ const customCheckboxStyles = StyleSheet.create({
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   checkbox: {
-    width: 20,
-    height: 20,
+    width: 25,
+    height: 25,
     borderRadius: 5,
     borderWidth: 2,
     borderColor: '#007bff',
@@ -41,7 +41,7 @@ const customCheckboxStyles = StyleSheet.create({
     borderColor: '#007bff',
   },
   label: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#333',
   },
 });

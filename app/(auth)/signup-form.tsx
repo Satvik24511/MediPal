@@ -17,6 +17,7 @@ const medicalHistoryOptions = [
 
 export default function SignupFormScreen() {
   const { db, userId, appId, showModal } = useAppContext();
+  console.log("Current app ID:", appId);
   const params = useLocalSearchParams();
   const viaABHA = params.viaABHA === 'true';
   const abhaName = params.abhaName as string || '';
@@ -52,14 +53,16 @@ export default function SignupFormScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!userId || !db) {
+    /*if (!userId || !db) {
+      console.log("Hi 1");
       showModal('Authentication error. Please restart the app.', 'error');
       return;
     }
     if (!fullName || !dateOfBirth || !weight || !height) {
+        console.log("Hi 2");
         showModal('Please fill in all required fields (marked with *).', 'error');
         return;
-    }
+    }*/
 
     const userData = {
       fullName,
@@ -78,9 +81,10 @@ export default function SignupFormScreen() {
     };
 
     try {
-      await saveMedicalHistory(db, appId, userId, userData);
-      showModal('Medical history saved successfully!', 'success');
-      router.replace('/(app)/(tabs)/');
+      showModal('Medical history saved successfully!', 'success', () => {
+        console.log("Hi 3");
+      });
+      //await saveMedicalHistory(db, appId, userId, userData);  
     } catch (error: any) {
       console.error("Error saving medical history:", error);
       showModal(`Failed to save medical history: ${error.message}`, 'error');

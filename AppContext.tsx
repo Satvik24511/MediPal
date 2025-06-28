@@ -7,7 +7,7 @@ interface AppContextType {
   db: Firestore | null;
   userId: string;
   appId: string;
-  showModal: (message: string, type?: 'success' | 'error' | 'info') => void;
+  showModal: (message: string, type?: 'success' | 'error' | 'info', onConfirm?: () => void) => void;
 }
 
 const AppContext = createContext<AppContextType>({
@@ -20,4 +20,4 @@ const AppContext = createContext<AppContextType>({
 
 export const useAppContext = () => useContext(AppContext);
 
-export default AppContext;
+export default AppContext; 

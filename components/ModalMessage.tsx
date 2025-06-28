@@ -7,9 +7,10 @@ interface ModalMessageProps {
   message: string;
   type: 'success' | 'error' | 'info';
   onClose: () => void;
+  onConfirm?: () => void;
 }
 
-export const ModalMessage: React.FC<ModalMessageProps> = ({ visible, message, type, onClose }) => {
+export const ModalMessage: React.FC<ModalMessageProps> = ({ visible, message, type, onClose, onConfirm }) => {
   let iconName: keyof typeof MaterialCommunityIcons.glyphMap;
   let iconColor: string;
   let backgroundColor: string;
@@ -33,18 +34,25 @@ export const ModalMessage: React.FC<ModalMessageProps> = ({ visible, message, ty
       break;
   }
 
+  const handleClose = () => {
+    onClose();
+    if (onConfirm) {
+      onConfirm();
+    }
+  };
+
   return (
     <Modal
       transparent={true}
       animationType="fade"
-      visible={visible}
-      onRequestClose={onClose}
+      visible={true}
+      onRequestClose={handleClose} 
     >
-      <TouchableOpacity style={modalMessageStyles.overlay} activeOpacity={1} onPress={onClose}>
-        <View style={[modalMessageStyles.modalContainer, { backgroundColor }]}>
+      <TouchableOpacity style={modalMessageStyles.overlay} activeOpacity={1} onPress={handleClose}>
+        <View style={[modalMessageStyles.modalContainer, { backgroundColor }]} onStartShouldSetResponder={() => true}>
           <MaterialCommunityIcons name={iconName} size={40} color={iconColor} style={modalMessageStyles.icon} />
           <Text style={modalMessageStyles.messageText}>{message}</Text>
-          <TouchableOpacity onPress={onClose} style={modalMessageStyles.closeButton}>
+          <TouchableOpacity onPress={handleClose} style={modalMessageStyles.closeButton}>
             <Text style={modalMessageStyles.closeButtonText}>OK</Text>
           </TouchableOpacity>
         </View>

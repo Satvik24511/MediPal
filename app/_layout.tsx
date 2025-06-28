@@ -31,10 +31,13 @@ export default function RootLayout() {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalType, setModalType] = useState<'success' | 'error' | 'info'>('info');
+  const [modalOnConfirm, setModalOnConfirm] = useState<(() => void) | undefined>(undefined);
 
-  const showModal = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const showModal = (message: string, type: 'success' | 'error' | 'info' = 'info', onConfirm?: () => void) => {
+    console.log("Show modal with message:", message);
     setModalMessage(message);
     setModalType(type);
+    setModalOnConfirm(() => onConfirm); 
     setModalVisible(true);
   };
 
@@ -76,7 +79,7 @@ export default function RootLayout() {
     );
   }
 
-  const contextValue = { auth, db, userId: currentUser?.uid || '', appId, showModal };
+  const contextValue = React.useMemo(() => ({ auth, db, userId: currentUser?.uid || '', appId, showModal }), [auth, db, currentUser, appId,showModal]);
 
   return (
     <AppContext.Provider value={contextValue}>
@@ -87,10 +90,14 @@ export default function RootLayout() {
         </Stack>
         <StatusBar style="light" />
         <ModalMessage
-          visible={modalVisible}
+          visible={true}
           message={modalMessage}
           type={modalType}
-          onClose={() => setModalVisible(false)}
+          onClose={() => {
+            setModalVisible(false);
+            setModalOnConfirm(undefined);
+          }}
+          onConfirm={modalOnConfirm}
         />
       </SafeAreaProvider>
     </AppContext.Provider>
