@@ -74,6 +74,7 @@ export default function SignupFormScreen() {
 
     try {
       showModal('Medical history saved successfully!', 'success');
+      router.replace({ pathname: '/(app)/index' });
     } catch (error: any) {
       console.error("Error saving medical history:", error);
       showModal(`Failed to save medical history: ${error.message}`, 'error');

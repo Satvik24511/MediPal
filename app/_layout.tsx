@@ -42,6 +42,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <Stack>
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(app)" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style="light" />
         <ModalMessage
