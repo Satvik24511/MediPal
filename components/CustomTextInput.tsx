@@ -22,8 +22,9 @@ export const CustomTextInput: React.FC<CustomTextInputProps> = ({ label, error, 
 
 const customTextInputStyles = StyleSheet.create({
   container: {
-    marginBottom: 15,
+    marginBottom: 20,
     width: '100%',
+    flexShrink: 1,
   },
   label: {
     fontSize: 16,
@@ -32,7 +33,7 @@ const customTextInputStyles = StyleSheet.create({
     fontWeight: '600',
   },
   input: {
-    height: 50,
+    minHeight: 50,
     borderColor: '#ddd',
     borderWidth: 1,
     borderRadius: 10,
@@ -44,6 +45,7 @@ const customTextInputStyles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+    flexShrink: 1,
   },
   inputError: {
     borderColor: '#ff6161',

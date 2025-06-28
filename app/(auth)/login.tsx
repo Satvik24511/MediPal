@@ -12,10 +12,6 @@ export default function LoginScreen() {
   const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleGetOtp = () => {
-    showModal('OTP sent to your mobile number! (Simulation)', 'info');
-    console.log('Sending OTP to:', mobileNumber);
-  };
 
   const handleSignUp = async () => {
     if (!mobileNumber || !otp || !password) {
@@ -23,7 +19,10 @@ export default function LoginScreen() {
         return;
     }
     showModal('Signup successful! Please complete your medical history.', 'success');
-    router.replace({ pathname: '/(auth)/signup-form', params: { viaABHA: 'false' } });
+    router.replace({
+      pathname: '/(auth)/signup-form',
+      params: { viaABHA: 'false' }
+    });
   };
 
   const handleContinueWithABHA = () => {
@@ -36,7 +35,7 @@ export default function LoginScreen() {
 
   return (
     <ImageBackground
-      source={require('../../assets/medilab_bg.png')}
+      source={require('../../assets/medilab_bg.jpg')}
       style={loginStyles.background}
       resizeMode="cover"
     >
@@ -53,18 +52,13 @@ export default function LoginScreen() {
       <View style={loginStyles.card}>
         <Text style={loginStyles.cardTitle}>Sign Up</Text>
 
-        <View style={loginStyles.inputGroup}>
-          <CustomTextInput
-            placeholder="+91 XXXXX XXXXX"
-            keyboardType="phone-pad"
-            value={mobileNumber}
-            onChangeText={setMobileNumber}
-            style={loginStyles.textInput}
-          />
-          <TouchableOpacity style={loginStyles.getOtpButton} onPress={handleGetOtp}>
-            <Text style={loginStyles.getOtpButtonText}>Get OTP</Text>
-          </TouchableOpacity>
-        </View>
+        <CustomTextInput
+          placeholder="+91 XXXXX XXXXX"
+          keyboardType="number-pad"
+          value={mobileNumber}
+          onChangeText={setMobileNumber}
+          style={loginStyles.textInputFullWidth}
+        />
 
         <CustomTextInput
           placeholder="Verify OTP"

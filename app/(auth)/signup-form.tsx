@@ -22,7 +22,6 @@ export default function SignupFormScreen() {
   const abhaName = params.abhaName as string || '';
   const abhaDob = params.abhaDob as string || '';
 
-  // State for form fields
   const [fullName, setFullName] = useState<string>(abhaName);
   const [dateOfBirth, setDateOfBirth] = useState<string>(abhaDob);
   const [gender, setGender] = useState<string>('');
@@ -234,7 +233,7 @@ const signupFormStyles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     padding: 25,
-    marginTop: -40,
+    marginTop: 20,
     marginBottom: 30,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
