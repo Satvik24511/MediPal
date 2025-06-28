@@ -45,7 +45,7 @@ export const ModalMessage: React.FC<ModalMessageProps> = ({ visible, message, ty
     <Modal
       transparent={true}
       animationType="fade"
-      visible={true}
+      visible={visible}
       onRequestClose={handleClose} 
     >
       <TouchableOpacity style={modalMessageStyles.overlay} activeOpacity={1} onPress={handleClose}>
