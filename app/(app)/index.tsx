@@ -1,15 +1,28 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, Platform, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, Platform, Dimensions, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { GradientButton } from '../../components/GradientButton';
 import { useAppContext } from '../../AppContext';
+import { getInteractionsOverviewFromLLM } from '../../api/llmService';
+
+// Helper function to escape HTML characters from the input string (No longer needed, but kept for reference)
+const htmlEscape = (str) => {
+  if (typeof str !== 'string') return str;
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
 
 export default function ConnectScreen() {
   const { showModal } = useAppContext();
   const [prescriptionText, setPrescriptionText] = useState('');
   const [reportGenerated, setReportGenerated] = useState(false);
-  const [reportContent, setReportContent] = useState('');
+  const [reportData, setReportData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
@@ -36,44 +49,50 @@ export default function ConnectScreen() {
     console.log("Add images of prescription (OCR functionality)");
   };
 
-  const handleUploadAndAnalyze = () => {
-    if (!prescriptionText.trim()) {
-        showModal('Please type your prescription or add an image before analyzing.', 'error');
-        return;
+  const handleUploadAndAnalyze = async () => {
+    if (isLoading) {
+      return;
     }
-    showModal('Analyzing your input... (ML model integration placeholder)', 'info');
+    if (!prescriptionText.trim()) {
+      showModal('Please type your prescription or add an image before analyzing.', 'error');
+      return;
+    }
+    
+    setIsLoading(true);
+    showModal('Analyzing your input...', 'info');
     console.log("Upload and Analyze prescription:", prescriptionText);
 
-    setTimeout(() => {
-      const dummyReport = `
-        **Medilab Health Report**
+    try {
+      console.log("Calling LLM API with prescription text:", prescriptionText);
+      const result = await getInteractionsOverviewFromLLM([prescriptionText]);
+      console.log("LLM API raw result:", result);
 
-        **Patient ID:** ${'N/A'}
-        **Date of Report:** ${new Date().toLocaleDateString()}
-
-        **Based on your input:**
-        - **Prescription:** ${prescriptionText || 'No manual text provided.'}
-        - **Analysis:** This is a simulated analysis. In a real scenario, an ML model would interpret your prescription/health data, identify drug interactions, suggest potential side effects, or highlight conditions based on your medical history.
-
-        **Recommendations (Simulated):**
-        1. Ensure consistent medication adherence as per your doctor's advice.
-        2. Follow up with your doctor regarding [specific simulated finding, e.g., 'the dosage of Drug X'].
-        3. Maintain a balanced diet, stay hydrated, and engage in regular physical activity.
-
-        **Disclaimer:** This is a preliminary, AI-generated report for informational purposes only and does not substitute professional medical advice. Always consult with a qualified healthcare provider for diagnosis and treatment.
-      `;
-      setReportContent(dummyReport);
-      setReportGenerated(true);
-      showModal('Report generated successfully!', 'success');
-    }, 2000);
+      if (Array.isArray(result) && result.length > 0) {
+        setReportData(result);
+        setReportGenerated(true);
+        showModal('Report generated successfully!', 'success');
+      } else if (Array.isArray(result) && result.length === 0) {
+        setReportData([]);
+        setReportGenerated(true);
+        showModal('Analysis complete! No significant interactions found.', 'success');
+      } else {
+        setReportData([]);
+        setReportGenerated(false);
+        showModal('Error during analysis. Unexpected response from the server.', 'error');
+      }
+    } catch (error) {
+      console.error("Error during LLM analysis:", error);
+      setReportData([]);
+      setReportGenerated(false);
+      showModal('An error occurred during analysis. Please try again.', 'error');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDownloadPdf = () => {
-    showModal('PDF generation and download functionality would be implemented here.', 'info');
-    console.log("Download report as PDF");
-  };
+  // The handleDownloadPdf function has been removed.
 
-  const handleScroll = (event: any) => {
+  const handleScroll = (event) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const layoutWidth = event.nativeEvent.layoutMeasurement.width;
     const newIndex = Math.round(contentOffsetX / layoutWidth);
@@ -105,6 +124,7 @@ export default function ConnectScreen() {
           colors={['#fd7e14', '#f8d7da']}
           buttonStyle={connectScreenStyles.prescriptionButton}
           textStyle={connectScreenStyles.prescriptionButtonText}
+          disabled={isLoading}
         />
 
         <Text style={connectScreenStyles.orText}>or</Text>
@@ -118,32 +138,46 @@ export default function ConnectScreen() {
             numberOfLines={4}
             value={prescriptionText}
             onChangeText={setPrescriptionText}
+            editable={!isLoading}
           />
-          <TouchableOpacity style={connectScreenStyles.micIcon}>
-            <MaterialCommunityIcons name="microphone" size={24} color="#666" />
+          <TouchableOpacity style={connectScreenStyles.micIcon} disabled={isLoading}>
+            <MaterialCommunityIcons name="microphone" size={24} color={isLoading ? '#ccc' : '#666'} />
           </TouchableOpacity>
         </View>
 
         <GradientButton
-          title="Upload and Analyze"
+          title={isLoading ? 'Analyzing...' : 'Upload and Analyze'}
           onPress={handleUploadAndAnalyze}
           colors={['#007bff', '#66ccff']}
           buttonStyle={connectScreenStyles.uploadButton}
           textStyle={connectScreenStyles.uploadButtonText}
+          disabled={isLoading}
         />
+        {isLoading && (
+          <ActivityIndicator size="small" color="#007bff" style={connectScreenStyles.loadingIndicator} />
+        )}
       </View>
 
       {reportGenerated && (
         <View style={connectScreenStyles.reportCard}>
           <Text style={connectScreenStyles.reportTitle}>Result</Text>
-          <Text style={connectScreenStyles.reportContent}>{reportContent}</Text>
-          <GradientButton
-            title="Convert to PDF & Download"
-            onPress={handleDownloadPdf}
-            colors={['#28a745', '#82E0AA']}
-            buttonStyle={connectScreenStyles.downloadPdfButton}
-            textStyle={connectScreenStyles.downloadPdfButtonText}
-          />
+          {reportData.length > 0 ? (
+            <View>
+              <Text style={connectScreenStyles.reportSectionTitle}>Potential Drug-Drug Interactions:</Text>
+              {reportData.map((interaction, index) => (
+                <View key={index} style={connectScreenStyles.interactionItem}>
+                  <Text style={connectScreenStyles.interactionHeader}>Input: <Text style={connectScreenStyles.boldText}>{interaction.drug1} + {interaction.drug2}</Text></Text>
+                  <Text style={connectScreenStyles.interactionText}>Interaction Type: <Text style={connectScreenStyles.boldText}>{interaction.interactionType || 'Not Provided'}</Text></Text>
+                  <Text style={connectScreenStyles.interactionText}>Effect: {interaction.effect || 'Not Provided'}</Text>
+                  <Text style={connectScreenStyles.interactionText}>Risk Level: <Text style={connectScreenStyles.boldText}>{interaction.riskLevel || 'Not Provided'}</Text></Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={connectScreenStyles.reportContent}>No significant drug-drug interactions found.</Text>
+          )}
+
+          {/* The download button has been removed from here */}
         </View>
       )}
 
@@ -274,14 +308,6 @@ const connectScreenStyles = StyleSheet.create({
     elevation: 2,
     marginBottom: 20,
   },
-  prescriptionTextInput: {
-    flex: 1,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    fontSize: 16,
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
   micIcon: {
     padding: 10,
     alignSelf: 'flex-start',
@@ -319,10 +345,12 @@ const connectScreenStyles = StyleSheet.create({
     lineHeight: 24,
     color: '#444',
     marginBottom: 20,
+    textAlign: 'center',
   },
   downloadPdfButton: {
     width: '80%',
     alignSelf: 'center',
+    marginTop: 20,
   },
   downloadPdfButtonText: {
     fontSize: 16,
@@ -364,4 +392,45 @@ const connectScreenStyles = StyleSheet.create({
     backgroundColor: '#FF6F61',
     marginHorizontal: 4,
   },
+  loadingIndicator: {
+    marginTop: 10,
+  },
+  interactionItem: {
+    marginBottom: 15,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  interactionHeader: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#333',
+  },
+  interactionText: {
+    fontSize: 14,
+    color: '#555',
+    lineHeight: 20,
+    marginBottom: 2,
+  },
+  reportSectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+    textAlign: 'left',
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  prescriptionTextInput: {
+    flex: 1,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 16,
+    minHeight: 100,
+    textAlignVertical: 'top',
+  }
 });
