@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, Platform, Dimensions, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -41,7 +41,7 @@ const callOcrService = async (base64Image) => {
 };
 
 export default function ConnectScreen() {
-  const { showModal } = useAppContext();
+  const { showModal, medicalHistoryData } = useAppContext();
   const [prescriptionText, setPrescriptionText] = useState('');
   const [reportGenerated, setReportGenerated] = useState(false);
   const [reportData, setReportData] = useState([]);
@@ -136,7 +136,7 @@ export default function ConnectScreen() {
 
     try {
       console.log("Calling LLM API with prescription text:", prescriptionText);
-      const result = await getInteractionsOverviewFromLLM([prescriptionText]);
+      const result = await getInteractionsOverviewFromLLM([prescriptionText], medicalHistoryData);
       console.log("LLM API raw result:", result);
 
       if (Array.isArray(result) && result.length > 0) {
@@ -182,7 +182,7 @@ export default function ConnectScreen() {
         <View style={connectScreenStyles.profileIconContainer}>
           <MaterialCommunityIcons name="account-circle" size={30} color="#fff" />
         </View>
-        <Text style={connectScreenStyles.appTitle}>Medilab</Text>
+        <Text style={connectScreenStyles.appTitle}>MediPal</Text>
       </LinearGradient>
 
       <View style={connectScreenStyles.contentCard}>

@@ -1,13 +1,13 @@
+// api/llmService.js
+// This file handles interactions with the external LLM API for drug interaction analysis.
 
+// Removed: import { useAppContext } from '../AppContext'; // No longer needed here
+// Removed: import { MedicalHistoryData } from '../AppContext'; // No longer needed here
 
-const API_KEY = "AIzaSyCvMBc7rz3SHCWv1mMirz841Kmz4b7HXys"; 
+const API_KEY = "AIzaSyCvMBc7rz3SHCWv1mMirz841Kmz4b7HXys";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
-import { MedicalHistoryData } from '../AppContext';
-
-const { medicalHistoryData, setMedicalHistoryData } = useAppContext();
-
-
+// Removed: const { medicalHistoryData, setMedicalHistoryData } = useAppContext(); // This caused the error
 
 export async function callLLMApi(prompt, schema) {
     let chatHistory = [];
@@ -87,30 +87,32 @@ export async function callLLMApi(prompt, schema) {
     }
 }
 
-export async function getInteractionsOverviewFromLLM(drugs) {
+// Updated: medicalHistoryData is now passed as an argument
+export async function getInteractionsOverviewFromLLM(drugs, medicalHistoryData) {
     const drugList = drugs.join(', ');
     const prompt = `Given the following drugs: ${drugList}.
-Identify all significant Drug-Drug Interactions (DDIs).
-For each DDI, provide:
-1.  \`drug1\` and \`drug2\`: The names of the interacting drugs.
-2.  \`interactionType\`: Describe the type of interaction (e.g., 'Pharmacodynamic', 'Pharmacokinetic').
-3.  \`effect\`: A concise summary of the primary clinical effect or risk.
-4.  \`riskLevel\`: Categorize the risk as 'High', 'Moderate', or 'Low'.
+    ${medicalHistoryData ? `and given the following medical details of user: ${JSON.stringify(medicalHistoryData)}` : ''}
+    Identify all significant Drug-Drug Interactions (DDIs). For the medicalHistory, conditions like hypertension, depression or some allergies are given. Find common medicines for these conditions, add them to the drug list and then do the DDI analysis for the whole list of medicines including the druglist and the medical history.
+    For each DDI, provide:
+    1.  \`drug1\` and \`drug2\`: The names of the interacting drugs.
+    2.  \`interactionType\`: Describe the type of interaction (e.g., 'Pharmacodynamic', 'Pharmacokinetic').
+    3.  \`effect\`: A concise summary of the primary clinical effect or risk.
+    4.  \`riskLevel\`: Categorize the risk as 'High', 'Moderate', or 'Low'.
 
-Return the response as a JSON array. Each object in the array MUST contain all four fields.
-If no significant interactions are found, return an empty array \`[]\`.
+    Return the response as a JSON array. Each object in the array MUST contain all four fields.
+    If no significant interactions are found, return an empty array \`[]\`.
 
-Example interaction object:
-\`\`\`json
-{
-  "drug1": "Warfarin",
-  "drug2": "Ibuprofen",
-  "interactionType": "Pharmacodynamic",
-  "effect": "Increased risk of bleeding.",
-  "riskLevel": "High"
-}
-\`\`\`
-`;
+    Example interaction object:
+    \`\`\`json
+    {
+      "drug1": "Warfarin",
+      "drug2": "Ibuprofen",
+      "interactionType": "Pharmacodynamic",
+      "effect": "Increased risk of bleeding.",
+      "riskLevel": "High"
+    }
+    \`\`\`
+    `;
 
     const schema = {
         type: "ARRAY",
@@ -126,7 +128,7 @@ Example interaction object:
             "required": ["drug1", "drug2", "interactionType", "effect", "riskLevel"]
         }
     };
-    
+
     const result = await callLLMApi(prompt, schema);
     return result || [];
 }

@@ -45,7 +45,7 @@ export default function LoginScreen() {
         end={{ x: 1, y: 1 }}
         style={loginStyles.headerGradient}
       >
-        <Text style={loginStyles.appTitle}>Medilab</Text>
+        <Text style={loginStyles.appTitle}>MediPal</Text>
         <Text style={loginStyles.appSubtitle}>Your Prescription, Analyzed by AI. Trusted by You.</Text>
       </LinearGradient>
 

@@ -30,7 +30,7 @@ export default function RootLayout() {
   if (loading) {
     return (
       <View style={rootLayoutStyles.loadingContainer}>
-        <Text style={rootLayoutStyles.loadingText}>Loading Medilab...</Text>
+        <Text style={rootLayoutStyles.loadingText}>Loading MediPal...</Text>
       </View>
     );
   }
