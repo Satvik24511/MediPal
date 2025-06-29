@@ -1,5 +1,11 @@
+
+
 const API_KEY = "AIzaSyCvMBc7rz3SHCWv1mMirz841Kmz4b7HXys"; 
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+import { MedicalHistoryData } from '../AppContext';
+
+const { medicalHistoryData, setMedicalHistoryData } = useAppContext();
 
 
 

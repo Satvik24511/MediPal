@@ -7,7 +7,6 @@ import { useAppContext } from '../../AppContext';
 import { getInteractionsOverviewFromLLM } from '../../api/llmService';
 import * as ImagePicker from 'expo-image-picker'; 
 
-// This helper function is no longer strictly needed for this file, but is a good practice to keep.
 const htmlEscape = (str) => {
   if (typeof str !== 'string') return str;
   return str
@@ -18,17 +17,11 @@ const htmlEscape = (str) => {
     .replace(/'/g, '&#039;');
 };
 
-// === FUNCTION TO CALL THE GEMINI OCR BACKEND SERVICE ===
 const callOcrService = async (base64Image) => {
-    // IMPORTANT: Replace '127.0.0.1' with your computer's local IP address if running on a physical device.
-    // Example: 'http://192.168.1.100:3000/ocr'
-    // For a simulator, '127.0.0.1' works perfectly.
-    const serverUrl = 'http://192.168.63.255:3002/ocr';
+    const serverUrl = 'http://192.168.40.221:3002/ocr';
 
     console.log("Calling OCR backend service at:", serverUrl);
     
-    // The base64 data from expo-image-picker might have a prefix (e.g., "data:image/jpeg;base64,").
-    // The server-side code is designed to handle this, so we can send the data as-is.
     
     const response = await fetch(serverUrl, {
         method: 'POST',
@@ -123,7 +116,7 @@ export default function ConnectScreen() {
         setIsLoading(false);
       }
     } else {
-      // User cancelled the image picker
+
       console.log('Image picking cancelled.');
     }
   };
