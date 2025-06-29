@@ -5,9 +5,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { GradientButton } from '../../components/GradientButton';
 import { useAppContext } from '../../AppContext';
 import { getInteractionsOverviewFromLLM } from '../../api/llmService';
+import * as ImagePicker from 'expo-image-picker'; 
 
-
-const htmlEscape = (str : string ) => {
+// This helper function is no longer strictly needed for this file, but is a good practice to keep.
+const htmlEscape = (str) => {
   if (typeof str !== 'string') return str;
   return str
     .replace(/&/g, '&amp;')
@@ -15,6 +16,35 @@ const htmlEscape = (str : string ) => {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+};
+
+// === FUNCTION TO CALL THE GEMINI OCR BACKEND SERVICE ===
+const callOcrService = async (base64Image) => {
+    // IMPORTANT: Replace '127.0.0.1' with your computer's local IP address if running on a physical device.
+    // Example: 'http://192.168.1.100:3000/ocr'
+    // For a simulator, '127.0.0.1' works perfectly.
+    const serverUrl = 'http://192.168.63.255:3002/ocr';
+
+    console.log("Calling OCR backend service at:", serverUrl);
+    
+    // The base64 data from expo-image-picker might have a prefix (e.g., "data:image/jpeg;base64,").
+    // The server-side code is designed to handle this, so we can send the data as-is.
+    
+    const response = await fetch(serverUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: base64Image }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Server responded with status ${response.status}: ${errorData.error || 'Unknown error'}`);
+    }
+
+    const data = await response.json();
+    return data.text;
 };
 
 export default function ConnectScreen() {
@@ -44,11 +74,60 @@ export default function ConnectScreen() {
     },
   ];
 
-  const handleAddImagePrescription = () => {
-    showModal('Image upload and OCR functionality would be implemented here.', 'info');
-    console.log("Add images of prescription (OCR functionality)");
-  };
+  // === UPDATED OCR FUNCTIONALITY ===
+  const handleAddImagePrescription = async () => {
+    if (isLoading) {
+      return;
+    }
 
+    // 1. Request permissions for media library access
+    const { status: mediaLibraryPermissionStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (mediaLibraryPermissionStatus !== 'granted') {
+      showModal('Permission to access your photo library is required to upload images!', 'error');
+      return;
+    }
+
+    // 2. Launch the image picker to select a photo from the gallery
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false, 
+      quality: 1,
+      base64: true, // This is crucial for sending image data to the backend
+    });
+
+    // 3. Handle the selection result
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const base64Image = result.assets[0].base64;
+
+      setIsLoading(true);
+      setPrescriptionText(''); // Clear the input field while processing
+      setReportGenerated(false); // Hide the old report
+      showModal('Extracting text from image... This may take a moment.', 'info');
+      console.log("Image selected for OCR, sending to backend...");
+
+      try {
+        // === CALL THE REAL OCR SERVICE HERE ===
+        const extractedText = await callOcrService(base64Image); 
+        
+        if (extractedText) {
+          setPrescriptionText(extractedText);
+          showModal('Text extracted successfully! Please review it before analyzing.', 'success');
+        } else {
+          showModal('Could not extract text. Please try a clearer or better-lit image.', 'error');
+        }
+      } catch (error) {
+        console.error("OCR Error:", error);
+        showModal(`An error occurred during OCR: ${error.message}. Make sure your backend server is running.`, 'error');
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // User cancelled the image picker
+      console.log('Image picking cancelled.');
+    }
+  };
+  
   const handleUploadAndAnalyze = async () => {
     if (isLoading) {
       return;
@@ -90,7 +169,6 @@ export default function ConnectScreen() {
     }
   };
 
-
   const handleScroll = (event) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const layoutWidth = event.nativeEvent.layoutMeasurement.width;
@@ -118,7 +196,7 @@ export default function ConnectScreen() {
         <Text style={connectScreenStyles.cardTitle}>Do a quick check up</Text>
 
         <GradientButton
-          title="Add images of prescription +"
+          title={isLoading ? 'Processing Image...' : 'Add images of prescription +'}
           onPress={handleAddImagePrescription}
           colors={['#fd7e14', '#f8d7da']}
           buttonStyle={connectScreenStyles.prescriptionButton}
@@ -150,7 +228,7 @@ export default function ConnectScreen() {
           colors={['#007bff', '#66ccff']}
           buttonStyle={connectScreenStyles.uploadButton}
           textStyle={connectScreenStyles.uploadButtonText}
-          disabled={isLoading}
+          disabled={isLoading || !prescriptionText.trim()}
         />
         {isLoading && (
           <ActivityIndicator size="small" color="#007bff" style={connectScreenStyles.loadingIndicator} />
@@ -175,7 +253,6 @@ export default function ConnectScreen() {
           ) : (
             <Text style={connectScreenStyles.reportContent}>No significant drug-drug interactions found.</Text>
           )}
-
         </View>
       )}
 
