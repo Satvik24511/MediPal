@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext, useMemo } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar'; 
 import { SafeAreaProvider } from 'react-native-safe-area-context'; 
@@ -18,8 +18,9 @@ export default function RootLayout() {
   const [modalType, setModalType] = useState<'success' | 'error' | 'info'>('info');
   const [modalOnConfirm, setModalOnConfirm] = useState < (() => void) | undefined > (undefined);
 
+  const [medicalHistoryData, setMedicalHistoryData] = useState<any | null>(null);
+
   const showModal = (message: string, type: 'success' | 'error' | 'info' = 'info', onConfirm?: () => void) => {
-    console.log("Show modal with message:", message);
     setModalMessage(message);
     setModalType(type);
     setModalOnConfirm(() => onConfirm);
@@ -34,9 +35,12 @@ export default function RootLayout() {
     );
   }
 
-  const contextValue = {
+  const contextValue = React.useMemo(() => ({
     showModal,
-  };
+    medicalHistoryData,
+    setMedicalHistoryData
+  }), [showModal, medicalHistoryData, setMedicalHistoryData]);
+  
   return (
     <AppContext.Provider value={contextValue}>
       <SafeAreaProvider>

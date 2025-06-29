@@ -6,8 +6,8 @@ import { GradientButton } from '../../components/GradientButton';
 import { useAppContext } from '../../AppContext';
 import { getInteractionsOverviewFromLLM } from '../../api/llmService';
 
-// Helper function to escape HTML characters from the input string (No longer needed, but kept for reference)
-const htmlEscape = (str) => {
+
+const htmlEscape = (str : string ) => {
   if (typeof str !== 'string') return str;
   return str
     .replace(/&/g, '&amp;')
@@ -90,7 +90,6 @@ export default function ConnectScreen() {
     }
   };
 
-  // The handleDownloadPdf function has been removed.
 
   const handleScroll = (event) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
@@ -177,7 +176,6 @@ export default function ConnectScreen() {
             <Text style={connectScreenStyles.reportContent}>No significant drug-drug interactions found.</Text>
           )}
 
-          {/* The download button has been removed from here */}
         </View>
       )}
 

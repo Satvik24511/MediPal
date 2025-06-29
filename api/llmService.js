@@ -1,17 +1,8 @@
-// api/llmService.js
-
-// Using the provided API key directly.
-// In a production environment, it is highly recommended to manage API keys
-// using environment variables and to NEVER commit them to version control.
 const API_KEY = "AIzaSyCvMBc7rz3SHCWv1mMirz841Kmz4b7HXys"; 
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
-/**
- * Helper function to make LLM API calls with robust parsing and error handling.
- * @param {string} prompt - The text prompt for the LLM.
- * @param {object} schema - The JSON schema for the expected response.
- * @returns {Promise<object|Array|null>} - Parsed JSON result or null on error/empty.
- */
+
+
 export async function callLLMApi(prompt, schema) {
     let chatHistory = [];
     chatHistory.push({ role: "user", parts: [{ text: prompt }] });
@@ -90,11 +81,6 @@ export async function callLLMApi(prompt, schema) {
     }
 }
 
-/**
- * Main function using a SINGLE LLM query to get all drug interaction details at once.
- * @param {string[]} drugs - Array of drug names.
- * @returns {Promise<Array>} - Array of detailed interaction objects.
- */
 export async function getInteractionsOverviewFromLLM(drugs) {
     const drugList = drugs.join(', ');
     const prompt = `Given the following drugs: ${drugList}.
@@ -135,9 +121,6 @@ Example interaction object:
         }
     };
     
-    // Call the single LLM API and return the result.
     const result = await callLLMApi(prompt, schema);
-    
-    // Return an empty array if the API call fails or returns null.
     return result || [];
 }

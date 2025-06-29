@@ -7,6 +7,8 @@ import { GradientButton } from '../../components/GradientButton';
 import { useAppContext } from '../../AppContext';
 import { router, useLocalSearchParams } from 'expo-router';
 
+import { MedicalHistoryData } from '../../AppContext';
+
 const medicalHistoryOptions = [
   'Hypertension', 'Diabetes', 'Chronic Kidney Disease', 'Heart Disease / Heart Failure',
   'Liver Disease / Hepatitis', 'Asthma or COPD', 'Thyroid Problems (Hypo/Hyper)', 'Cancer',
@@ -15,7 +17,7 @@ const medicalHistoryOptions = [
 ];
 
 export default function SignupFormScreen() {
-  const { showModal } = useAppContext();
+  const { showModal, medicalHistoryData, setMedicalHistoryData } = useAppContext();
   const params = useLocalSearchParams();
   const viaABHA = params.viaABHA === 'true';
   const abhaName = params.abhaName as string || '';
@@ -51,12 +53,13 @@ export default function SignupFormScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!fullName || !dateOfBirth || !weight || !height) {
+    // Removed Firebase/Firestore specific checks here
+    if (!fullName.trim() || !dateOfBirth.trim() || !weight.trim() || !height.trim()) {
         showModal('Please fill in all required fields (marked with *).', 'error');
         return;
     }
 
-    const userData = {
+    const userData: MedicalHistoryData = {
       fullName,
       dateOfBirth,
       gender,
@@ -73,8 +76,14 @@ export default function SignupFormScreen() {
     };
 
     try {
-      showModal('Medical history saved successfully!', 'success');
-      router.replace({ pathname: '/(app)' });
+      console.log("Simulating saving medical history:", userData);
+      await new Promise(resolve => setTimeout(resolve, 500)); 
+
+      setMedicalHistoryData(userData);
+
+      showModal('Medical history saved successfully!', 'success', () => {
+        router.replace('/(app)'); 
+      });
     } catch (error: any) {
       console.error("Error saving medical history:", error);
       showModal(`Failed to save medical history: ${error.message}`, 'error');
